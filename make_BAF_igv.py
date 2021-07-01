@@ -7,7 +7,7 @@ def calc_baf(args):
     output_file.write("chromosome\tstart\tend\tlocus\tbaf\n")
     vcf_file = args.inputfile
     with open(vcf_file, 'r') as vcf_input_file: 
-        vcf_reader = vcf.Reader(open(vcf_file, 'r'))
+        vcf_reader = vcf.Reader(vcf_input_file)
         sampleid = vcf_reader.samples[0]
         for record in vcf_reader:
             chrom = record.CHROM
@@ -15,22 +15,21 @@ def calc_baf(args):
             start = end - 1
             locus = "{}:{}-{}".format(chrom, start, end)
             dp = record.genotype(sampleid)['DP']
-            variant_call = record.genotype(sampleid).is_variant
-
-            if dp >= args.mindepth: 
-                if variant_call == True:
+            variant_call = record.genotype(sampleid).is_variant  # Return True if not a reference call
+            if dp >= args.mindepth:
+                if variant_call == True: # Calculate ad and baf for variant-calls
                     ad = record.genotype(sampleid)['AD']
                     baf = (ad[1] / dp) * 100
-                elif variant_call == False:
+                elif variant_call == False: # Calculate ad and baf for reference-calls
                     try:
                         ad = [record.genotype(sampleid)['AD']]
                         baf = ((dp - ad[0]) / (dp)) * 100
-                    except:  # Bypass to remove positions without AD
+                    except:  # Skip ref/ref cals without AD fiel (this does exist)
+                        print("Locus {} has no AD field, skipping variant position as BAF could not be determined".format(locus))
                         continue
-                else: # is_variant status can be None
+                else: # In case variant status is not known (no call or ./.)
                     continue
-
-            else:
+            else:  # If threshold if not met, skip position
                 continue
 
             if len(ad) <= 2:  # skip multiallelic sites
