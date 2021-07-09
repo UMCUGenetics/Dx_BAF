@@ -4,18 +4,18 @@ import vcf
 
 def calc_baf(args):
     output_file = open(args.outputfile, 'w')
-    output_file.write("chromosome\tstart\tend\tlocus\tbaf\n")
+    output_file.write("#track type=igv name=BAF_track color=0,100,0 graphType=points windowingFunction=none maxHeightPixels=100 viewLimits=0,100\nchromosome\tstart\tend\tlocus\tbaf\n")
     vcf_file = args.inputfile
     with open(vcf_file, 'r') as vcf_input_file: 
         vcf_reader = vcf.Reader(vcf_input_file)
         sampleid = vcf_reader.samples[0]
-        for record in vcf_reader:
+        for record in vcf_reader:  # Parse all variant positions, and determine BAF if possible.
             chrom = record.CHROM
             end = record.POS
             start = end - 1
             locus = "{}:{}-{}".format(chrom, start, end)
             dp = record.genotype(sampleid)['DP']
-            variant_call = record.genotype(sampleid).is_variant  # Return True if not a reference call
+            variant_call = record.genotype(sampleid).is_variant  # Returns True if a variant-call, and thus not a reference-call
             if dp >= args.mindepth:
                 if variant_call == True: # Calculate ad and baf for variant-calls
                     ad = record.genotype(sampleid)['AD']
@@ -24,7 +24,7 @@ def calc_baf(args):
                     try:
                         ad = [record.genotype(sampleid)['AD']]
                         baf = ((dp - ad[0]) / (dp)) * 100
-                    except:  # Skip ref/ref cals without AD fiel (this does exist)
+                    except:  # Skip ref/ref cals without AD field (this does exist)
                         print("Locus {} has no AD field, skipping variant position as BAF could not be determined".format(locus))
                         continue
                 else: # In case variant status is not known (no call or ./.)
