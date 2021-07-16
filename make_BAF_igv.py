@@ -14,7 +14,11 @@ def calc_baf(args):
             end = record.POS
             start = end - 1
             locus = "{}:{}-{}".format(chrom, start, end)
-            dp = record.genotype(sampleid)['DP']
+            try:
+                dp = record.genotype(sampleid)['DP']
+            except:  # Skip ref/ref cals without AD field (this does exist)
+                print("Locus {} has no DP field, skipping variant position as BAF could not be determined".format(locus))
+                continue
             variant_call = record.genotype(sampleid).is_variant  # Returns True if a variant-call, and thus not a reference-call
             if dp >= args.mindepth:
                 if variant_call == True: # Calculate ad and baf for variant-calls
