@@ -1,4 +1,5 @@
 #! /usr/bin/env python3
+import sys
 import argparse
 import vcf
 
@@ -8,6 +9,8 @@ def calc_baf(args):
     vcf_file = args.inputfile
     with open(vcf_file, 'r') as vcf_input_file: 
         vcf_reader = vcf.Reader(vcf_input_file)
+        if len(vcf_reader.samples) > 1:
+            sys.exit("Single sample VCF support only. Input file {} is a multisample VCF".format(args.inputfile))
         sampleid = vcf_reader.samples[0]
         for record in vcf_reader:  # Parse all variant positions, and determine BAF if possible.
             chrom = record.CHROM
