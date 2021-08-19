@@ -5,13 +5,14 @@ import vcf
 
 def calc_baf(args):
     output_file = open(args.outputfile, 'w')
-    output_file.write("#track type=igv name=BAF_track color=0,100,0 graphType=points windowingFunction=none maxHeightPixels=100 viewLimits=0,100\nchromosome\tstart\tend\tlocus\tbaf\n")
     vcf_file = args.inputfile
     with open(vcf_file, 'r') as vcf_input_file: 
         vcf_reader = vcf.Reader(vcf_input_file)
         if len(vcf_reader.samples) > 1:
             sys.exit("Single sample VCF support only. Input file {} is a multisample VCF".format(args.inputfile))
         sampleid = vcf_reader.samples[0]
+        output_file.write("#track type=igv name=BAF_{} color=0,100,0 altColor==0,100,0 graphType=points windowingFunction=none maxHeightPixels=100 viewLimits=0,100\n".format(sampleid))
+        output_file.write("chromosome\tstart\tend\tlocus\tbaf\n")
         for record in vcf_reader:  # Parse all variant positions, and determine BAF if possible.
             chrom = record.CHROM
             end = record.POS
