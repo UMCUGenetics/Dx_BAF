@@ -76,7 +76,7 @@ def calc_baf(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('inputfile', help='input VCF file (genotyped VCF). VCF must be uncompressed')
-    parser.add_argument('-o', '--outputfile', help='output filename')
+    parser.add_argument('-o', '--outputfile', help='output filename. Without argument, output will be printed in stdout')
     parser.add_argument('--mindepth', default= 15, type=int, help='Threshold for minimum depth (DP) of SNV (default = 15)')
     args = parser.parse_args()
     calc_baf(args)
