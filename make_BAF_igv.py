@@ -9,11 +9,11 @@ def calc_baf(args):
 
     with open(args.inputfile, 'r') as vcf_input_file:
         vcf_reader = vcf.Reader(vcf_input_file)
-        if 'fileformat' not in vcf_reader.metadata:
+        if 'fileformat' not in vcf_reader.metadata: # Check if true VCF file
             sys.exit("Input file {} is not a correct VCF file. "\
                 "Field \"fileformat\" was not detected in VCF".format(args.inputfile)
                 )
-        if len(vcf_reader.samples) > 1:
+        if len(vcf_reader.samples) > 1: # Check is VCF is not a multisample VCF
             sys.exit("Single sample VCF support only. Input file {} is a multisample VCF".format(args.inputfile))
 
         sampleid = vcf_reader.samples[0]
