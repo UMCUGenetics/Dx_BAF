@@ -39,22 +39,19 @@ def calc_baf(args):
                 continue
 
             variant_call = record.genotype(sampleid).is_variant  # Returns True if a variant-call, and thus not a reference-call
-            if dp >= args.mindepth:
-                if variant_call == True: # Calculate ad and baf for variant-calls
-                    ad = record.genotype(sampleid)['AD']
-                    baf = (ad[1] / dp) * 100
-                elif variant_call == False: # Calculate ad and baf for reference-calls
 
-                    if 'AD' in record.genotype(sampleid).data._asdict():
-                        ad = [record.genotype(sampleid)['AD']]
-                        baf = ((dp - ad[0]) / (dp)) * 100
-                    else: # Skip variant position as BAF could not be determined because AP is missing
-                        continue
+            if dp >= args.mindepth and variant_call == True: 
+                """ Calculate ad and baf for variant-calls if QC is correct """
+                ad = record.genotype(sampleid)['AD']
+                baf = (ad[1] / dp) * 100
 
-                else: # In case variant status is not known (no call or ./.)
-                    continue
-            else:  # If threshold if not met, skip position
-                continue
+            elif dp >= args.mindepth and variant_call == False and 'AD' in record.genotype(sampleid).data._asdict():
+                """ Calculate ad and baf for reference-calls if QC is correct """
+                ad = [record.genotype(sampleid)['AD']]
+                baf = ((dp - ad[0]) / (dp)) * 100
+
+            else:
+                continue  
 
             if len(ad) <= 2:  # skip multiallelic sites
                 variant_line = "{chrom}\t{start}\t{end}\t{locus}\t{baf:.2f}".format(
