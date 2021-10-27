@@ -7,7 +7,11 @@ def calc_baf(args):
     if args.outputfile:
         output_file = open(args.outputfile, 'w')
 
-    with open(args.inputfile, 'r') as vcf_input_file:
+    open_mode = "r"
+    if args.compressed:
+        open_mode = "rb"
+
+    with open(args.inputfile, open_mode) as vcf_input_file:
         vcf_reader = vcf.Reader(vcf_input_file)
         if 'fileformat' not in vcf_reader.metadata: # Check if true VCF file
             sys.exit("Input file {} is not a correct VCF file. "\
@@ -39,7 +43,6 @@ def calc_baf(args):
                 continue
 
             variant_call = record.genotype(sampleid).is_variant  # Returns True if a variant-call, and thus not a reference-call
-
             if dp >= args.mindepth and variant_call == True: 
                 """ Calculate ad and baf for variant-calls if QC is correct """
                 ad = record.genotype(sampleid)['AD']
@@ -50,6 +53,9 @@ def calc_baf(args):
                 baf = ((dp - ad[0]) / (dp)) * 100
             else:
                 continue  
+
+            if record.ALT[0] and record.var_subtype is "del" or record.var_subtype is "ins": # skip insertion and deletions
+                continue
 
             if len(ad) <= 2:  # skip multiallelic sites
                 variant_line = "{chrom}\t{start}\t{end}\t{locus}\t{baf:.2f}".format(
@@ -72,6 +78,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('inputfile', help='input VCF file (genotyped VCF). VCF must be uncompressed')
     parser.add_argument('-o', '--outputfile', help='output filename. Without argument, output will be printed in stdout')
+    parser.add_argument('-c', '--compressed', action='store_true', help='VCF input is compressed (.gz)')
     parser.add_argument('--mindepth', default= 15, type=int, help='Threshold for minimum depth (DP) of SNV (default = 15)')
     args = parser.parse_args()
     calc_baf(args)
