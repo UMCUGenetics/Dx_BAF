@@ -2,7 +2,8 @@
 
 Software to parse VCF file and create B-allele frequency IGV track.
 
-# Usage
+## Usage
+```bash
 usage: make_BAF_igv.py [-h] [-o OUTPUTFILE] [-c] [--mindepth MINDEPTH]
                        inputfile
 
@@ -16,6 +17,7 @@ optional arguments:
                         printed in stdout
   -c, --compressed      VCF input is compressed (.gz)
   --mindepth MINDEPTH   Threshold for minimum depth (DP) of SNV (default = 15)
+```
 
 ## Installation
 To run the BAF scripts we need to create a virtual python environment
