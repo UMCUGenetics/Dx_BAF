@@ -20,7 +20,7 @@ optional arguments:
 ## Installation
 To run the BAF scripts we need to create a virtual python environment
 
-### Make virtual python environment
+### Make virtual python environment (note this could be UMCU-HPC specific)
 ```bash
 python3 -m venv venv
 source venv/bin/activate
