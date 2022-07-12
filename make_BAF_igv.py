@@ -55,8 +55,12 @@ def calc_baf(args):
                 """ Calculate ad and baf for variant-calls if QC is correct """
                 ad = record.genotype(sampleid)['AD']
                 baf = (ad[1] / dp) * 100
-            elif dp >= args.mindepth and not variant_call and 'AD' in record.genotype(sampleid).data._asdict():
-                """ Calculate ad and baf for reference-calls if QC is correct """
+            elif(
+                dp >= args.mindepth and not variant_call and
+                'AD' in record.genotype(sampleid).data._asdict() and
+                record.num_unknown == 0
+            ):
+                """ Calculate ad and baf for reference-calls if QC is correct and GT is not missing alleles (i.e. ./.)"""
                 ad = [record.genotype(sampleid)['AD']]
                 baf = ((dp - ad[0]) / (dp)) * 100
             else:
